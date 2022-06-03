@@ -2,9 +2,8 @@
 id: configuring_unleash
 title: Configuring Unleash
 ---
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
+import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
 > This is the guide on how to configure **Unleash v4 self-hosted**. If you are still using Unleash v3 you should checkout [configuring Unleash v3](./configuring_unleash_v3)
 
@@ -60,6 +59,7 @@ unleash.start(unleashOptions);
 **Available Unleash options include:**
 
 - **authentication** - (object) - An object for configuring/implementing custom admin authentication
+
   - enableApiToken (boolean) - Should unleash require API tokens for access? Defaults to `true`
   - type (string) What kind of authentication to use. Possible values
     - `open-source` - Sign in with username and password. This is the default value.
@@ -68,20 +68,24 @@ unleash.start(unleashOptions);
     - `demo` - Only requires an email to sign in (was default in v3)
   - customAuthHandler: (function) - custom express middleware handling authentication. Used when type is set to `custom`
   - createAdminUser: (boolean) - whether to create an admin user with default password - Defaults to `true`
-  - initApiTokens: (ApiTokens[]) - Array of API tokens to create on startup. The tokens will only be created if the database doesn't already contain any API tokens.
-      Example:
-     ```ts
-     [{
+  - initApiTokens: (ApiTokens[]) - Array of API tokens to create on startup. The tokens will only be created if the database doesn't already contain any API tokens. Example:
+
+    ```ts
+    [
+      {
         environment: '*',
         project: '*',
         secret: '*:*.964a287e1b728cb5f4f3e0120df92cb5',
         type: ApiTokenType.ADMIN,
         username: 'some-user',
-    }]
-     ```
-      The tokens can be of any API token type. Note that _admin_ tokens **must** target all environments and projects (i.e. use `'*'` for `environments` and `project` and start the secret with `*:*.`).
+      },
+    ];
+    ```
 
-      You can also use the environment variables `INIT_ADMIN_API_TOKENS` or `INIT_CLIENT_API_TOKENS` to create API admin or client tokens on startup. Both variables require a comma-separated list of API tokens to initialize (for instance `*:*.some-random-string, *:*.some-other-token`). The tokens found in `INIT_ADMIN_API_TOKENS` and `INIT_CLIENT_API_TOKENS` will be created as admin and client tokens respectively and Unleash will assign a username automatically.
+    The tokens can be of any API token type. Note that _admin_ tokens **must** target all environments and projects (i.e. use `'*'` for `environments` and `project` and start the secret with `*:*.`).
+
+    You can also use the environment variables `INIT_ADMIN_API_TOKENS` or `INIT_CLIENT_API_TOKENS` to create API admin or client tokens on startup. Both variables require a comma-separated list of API tokens to initialize (for instance `*:*.some-random-string, *:*.some-other-token`). The tokens found in `INIT_ADMIN_API_TOKENS` and `INIT_CLIENT_API_TOKENS` will be created as admin and client tokens respectively and Unleash will assign a username automatically.
+
 - **databaseUrl** - (_deprecated_) the postgres database url to connect to. Only used if _db_ object is not specified, and overrides the _db_ object and any environment variables that change parts of it (like `DATABASE_SSL`). Should include username/password. This value may also be set via the `DATABASE_URL` environment variable. Alternatively, if you would like to read the database url from a file, you may set the `DATABASE_URL_FILE` environment variable with the full file path. The contents of the file must be the database url exactly.
 - **db** - The database configuration object. See [the database configuration section](#database-configuration) for a full overview of the available properties.
 - **disableLegacyFeaturesApi** (boolean) - whether to disable the [legacy features API](../api/admin/feature-toggles-api.md). Defaults to `false` (`DISABLE_LEGACY_FEATURES_API`). Introduced in Unleash 4.6.
@@ -113,12 +117,15 @@ unleash.start(unleashOptions);
   - _unleashUrl_ (string) - Used to specify the official URL this instance of Unleash can be accessed at for an end user. Can also be configured through the environment variable `UNLEASH_URL`.
   - _gracefulShutdownEnable_: (boolean) - Used to control if Unleash should shutdown gracefully (close connections, stop tasks,). Defaults to true. `GRACEFUL_SHUTDOWN_ENABLE`
   - _gracefulShutdownTimeout_: (number) - Used to control the timeout, in milliseconds, for shutdown Unleash gracefully. Will kill all connections regardless if this timeout is exceeded. Defaults to 1000ms `GRACEFUL_SHUTDOWN_TIMEOUT`
+- **session** - The session config object takes the following options:
+  - _ttlHours_ (`SESSION_TTL_HOURS`) Number of hours a user session is allowed to live before a new sign-in is required. Defaults to 48 hours.
+  - _clearSiteDataOnLogout_ (`SESSION_CLEAR_SITE_DATA_ON_LOGOUT`) If true a logout action will return a Clear Site Data response header instructing the browser to clear all cookies on the same domain Unleash is running on. If disabled unleash will only destroy and clear the session cookie. Defaults to _true_.
+  - _cookieName_ - Name of the cookies used to hold the session id. Defaults to 'unleash-session'.
 - **ui** (object) - Set of UI specific overrides. You may set the following keys: `environment`, `slogan`.
 - **versionCheck** - the object deciding where to check for latest version
   - `url` - The url to check version (Defaults to `https://version.unleash.run`) - Overridable with (`UNLEASH_VERSION_URL`)
   - `enable` - Whether version checking is enabled (defaults to true) - Overridable with (`CHECK_VERSION`) (if anything other than `true`, does not check)
-- **environmentEnableOverrides** - A list of environment names to force enable at startup. This is feature should be
-  used with caution. When passed a list, this will enable each environment in that list and disable all other environments. You can't use this to disable all environments, passing an empty list will do nothing. If one of the given environments is not already enabled on startup then it will also enable projects and toggles for that environment. Note that if one of the passed environments doesn't already exist this will do nothing aside from log a warning.
+- **environmentEnableOverrides** - A list of environment names to force enable at startup. This is feature should be used with caution. When passed a list, this will enable each environment in that list and disable all other environments. You can't use this to disable all environments, passing an empty list will do nothing. If one of the given environments is not already enabled on startup then it will also enable projects and toggles for that environment. Note that if one of the passed environments doesn't already exist this will do nothing aside from log a warning.
 
   You can also set the environment variable `ENABLED_ENVIRONMENTS` to a comma delimited string of environment names to override environments.
 
@@ -191,43 +198,40 @@ The logger interface with its `debug`, `info`, `warn` and `error` methods expect
 
 ## Database configuration
 
-:::info
-In-code configuration values take precedence over environment values: If you provide a database username both via environment variables and in code with the Unleash options object, Unleash will use the in-code username.
-:::
+:::info In-code configuration values take precedence over environment values: If you provide a database username both via environment variables and in code with the Unleash options object, Unleash will use the in-code username. :::
 
 You cannot run the Unleash server without a database. You must provide Unleash with database connection details for it to start correctly.
 
 The available options are listed in the table below. Options can be specified either via JavaScript (only when starting Unleash via code) or via environment variables. The "property name" column below gives the name of the property on the Unleash options' `db` object.
 
-| Property name            | Environment variable            | Default value  | Description                                                                                                                                                                              |
-|--------------------------|---------------------------------|----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `user`                   | `DATABASE_USERNAME`             | `unleash_user` | The database username.                                                                                                                                                                   |
-| `password`               | `DATABASE_PASSWORD`             | `passord`      | The database password.                                                                                                                                                                   |
-| `host`                   | `DATABASE_HOST`                 | `localhost`    | The database hostname.                                                                                                                                                                   |
-| `port`                   | `DATABASE_PORT`                 | `5432`         | The database port.                                                                                                                                                                       |
-| `database`               | `DATABASE_NAME`                 | `unleash`      | The name of the database.                                                                                                                                                                |
-| `ssl`                    | `DATABASE_SSL`                  | N/A            | An object describing SSL options. In code, provide a regular JavaScript object. When using the environment variable, provide a **stringified JSON object**.                              |
-| `pool`                   | N/A (use the below variables)  |                | An object describing database pool options. With environment variables, use the options below directly.                                                                                  |
-| `pool.min`               | `DATABASE_POOL_MIN`             | 0              | The minimum number of connections in the connection pool.                                                                                                                                |
-| `pool.max`               | `DATABASE_POOL_MAX`             | 4              | The maximum number of connections in the connection pool.                                                                                                                                |
-| `pool.idleTimeoutMillis` | `DATABASE_POOL_IDLE_TIMEOUT_MS` | 30000          | The amount of time (in milliseconds) that a connection must be idle for before it is marked as a candidate for eviction.                                                                 |
-| `applicationName`        | `DATABASE_APPLICATION_NAME`     | `unleash`      | The name of the application that created this Client instance.                                                                                    |
-| `schema`        | `DATABASE_SCHEMA`     | `public`      | The schema to use in the database.                                                                                    |
+| Property name | Environment variable | Default value | Description |
+| --- | --- | --- | --- |
+| `user` | `DATABASE_USERNAME` | `unleash_user` | The database username. |
+| `password` | `DATABASE_PASSWORD` | `passord` | The database password. |
+| `host` | `DATABASE_HOST` | `localhost` | The database hostname. |
+| `port` | `DATABASE_PORT` | `5432` | The database port. |
+| `database` | `DATABASE_NAME` | `unleash` | The name of the database. |
+| `ssl` | `DATABASE_SSL` | N/A | An object describing SSL options. In code, provide a regular JavaScript object. When using the environment variable, provide a **stringified JSON object**. |
+| `pool` | N/A (use the below variables) |  | An object describing database pool options. With environment variables, use the options below directly. |
+| `pool.min` | `DATABASE_POOL_MIN` | 0 | The minimum number of connections in the connection pool. |
+| `pool.max` | `DATABASE_POOL_MAX` | 4 | The maximum number of connections in the connection pool. |
+| `pool.idleTimeoutMillis` | `DATABASE_POOL_IDLE_TIMEOUT_MS` | 30000 | The amount of time (in milliseconds) that a connection must be idle for before it is marked as a candidate for eviction. |
+| `applicationName` | `DATABASE_APPLICATION_NAME` | `unleash` | The name of the application that created this Client instance. |
+| `schema` | `DATABASE_SCHEMA` | `public` | The schema to use in the database. |
 
-Alternatively, you can use a [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) to connect to the database. You can provide it directly or from a file by using one of the below options. In JavaScript, these are top-level properties of the root configuration object, *not* the `db` object.
+Alternatively, you can use a [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) to connect to the database. You can provide it directly or from a file by using one of the below options. In JavaScript, these are top-level properties of the root configuration object, _not_ the `db` object.
 
-| Property name     | Environment variable | Default value | Description                                                                                                                                                                              |
-|-------------------|----------------------|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `databaseUrl`     | `DATABASE_URL`       | N/A           | A string that matches the [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING), such as `postgres://USER:PASSWORD@HOST:PORT/DATABASE`. |
-| `databaseUrlFile` | `DATABASE_URL_FILE`  | N/A           | The path to a file that contains a [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING).                                               |
-
+| Property name | Environment variable | Default value | Description |
+| --- | --- | --- | --- |
+| `databaseUrl` | `DATABASE_URL` | N/A | A string that matches the [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING), such as `postgres://USER:PASSWORD@HOST:PORT/DATABASE`. |
+| `databaseUrlFile` | `DATABASE_URL_FILE` | N/A | The path to a file that contains a [libpq connection string](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING). |
 
 Below is an example JavaScript configuration object.
 
-``` js
+```js
 const unleashOptions = {
-  databaseUrl: "postgres:/USER:PASSWORD@HOST:PORT/DATABASE",
-  databaseUrlFile: "/path/to/file",
+  databaseUrl: 'postgres:/USER:PASSWORD@HOST:PORT/DATABASE',
+  databaseUrlFile: '/path/to/file',
   db: {
     user: 'unleash_user',
     password: 'passord',
@@ -254,21 +258,22 @@ If you want to read content from a file, you should either initialize Unleash vi
 
 <TabItem value="js" label="JavaScript" default>
 
-``` js title="Reading from the file system in JavaScript"
+```js title="Reading from the file system in JavaScript"
 const unleashOptions = {
-    db: {
-        // other options omitted for brevity
-        ssl: {
-            ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
-        }
-    }}
+  db: {
+    // other options omitted for brevity
+    ssl: {
+      ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
+    },
+  },
+};
 ```
 
 </TabItem>
 
 <TabItem value="env" label="Environment variables (bash)">
 
-``` bash title="Reading from the file system with bash"
+```bash title="Reading from the file system with bash"
 DATABASE_SSL="{ \"key\": \"$(cat /path/to/server-certificates/root.crt)\" }"
 ```
 
@@ -276,10 +281,7 @@ DATABASE_SSL="{ \"key\": \"$(cat /path/to/server-certificates/root.crt)\" }"
 
 </Tabs>
 
-
-
 ### Enabling self-signed certificates
-
 
 To use self-signed certificates, you should set the SSL property `rejectUnauthorized` to `false` and set the `ca` property to the value of the certificate:
 
@@ -287,24 +289,24 @@ To use self-signed certificates, you should set the SSL property `rejectUnauthor
 
 <TabItem value="js" label="JavaScript" default>
 
-``` js title="Enable self-signed certificates"
+```js title="Enable self-signed certificates"
 const unleashOptions = {
-    db: {
-        // other options omitted for brevity
-        ssl: {
-            rejectUnauthorized: false,
-            ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
-        }
-    }}
-
+  db: {
+    // other options omitted for brevity
+    ssl: {
+      rejectUnauthorized: false,
+      ca: fs.readFileSync('/path/to/server-certificates/root.crt').toString(),
+    },
+  },
+};
 ```
 
 </TabItem>
 
 <TabItem value="env" label="Environment variables (bash)">
 
-``` bash title="Enable self-signed certificates"
-DATABASE_SSL="{ \"rejectUnauthorized\": false, \"key\": \"$(cat /path/to/server-certificates/root.crt)\" }"
+```bash title="Enable self-signed certifsessione, "key": "$(cat /path/to/server-certificates/root.crt)" }"
+
 ```
 
 </TabItem>
