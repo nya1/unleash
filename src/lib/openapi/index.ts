@@ -33,6 +33,10 @@ import { variantsSchema } from './spec/variants-schema';
 import { versionSchema } from './spec/version-schema';
 import { environmentsSchema } from './spec/environments-schema';
 import { sortOrderSchema } from './spec/sort-order-schema';
+import { tagTypeSchema } from './spec/tag-type-schema';
+import { tagTypesSchema } from './spec/tag-types-schema';
+import { updateTagTypeSchema } from './spec/update-tag-type-schema';
+import { validateTagTypeSchema } from './spec/validate-tag-type-schema';
 
 // Schemas must have $id property on the form "#/components/schemas/mySchema".
 export type SchemaId = typeof schemas[keyof typeof schemas]['$id'];
@@ -85,9 +89,13 @@ export const schemas = {
     strategySchema,
     tagSchema,
     tagsSchema,
+    tagTypeSchema,
+    tagTypesSchema,
     uiConfigSchema,
     updateFeatureSchema,
     updateStrategySchema,
+    updateTagTypeSchema,
+    validateTagTypeSchema,
     variantSchema,
     variantsSchema,
     versionSchema,
