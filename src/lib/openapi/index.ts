@@ -34,6 +34,7 @@ import { versionSchema } from './spec/version-schema';
 import { environmentsSchema } from './spec/environments-schema';
 import { sortOrderSchema } from './spec/sort-order-schema';
 import { splashSchema } from './spec/splash-schema';
+import { feedbackSchema } from './spec/feedback-schema';
 
 // Schemas must have $id property on the form "#/components/schemas/mySchema".
 export type SchemaId = typeof schemas[keyof typeof schemas]['$id'];
@@ -73,6 +74,7 @@ export const schemas = {
     featureTypesSchema,
     featureVariantsSchema,
     featuresSchema,
+    feedbackSchema,
     healthOverviewSchema,
     healthReportSchema,
     overrideSchema,
